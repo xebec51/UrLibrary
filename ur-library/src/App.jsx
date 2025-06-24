@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -9,11 +9,17 @@ import AddBookPage from './pages/AddBookPage';
 import EditBookPage from './pages/EditBookPage';
 
 function App() {
+  const location = useLocation();
+  const isAdminPage = location.pathname.includes('/admin');
+  
+  // Gunakan padding top hanya untuk halaman non-admin
+  const mainClass = isAdminPage ? "pb-10" : "pt-12 pb-10";
+
   return (
     <>
       <Navbar />
 
-      <main className="p-4">
+      <main className={mainClass}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/books/:id" element={<BookDetailPage />} />

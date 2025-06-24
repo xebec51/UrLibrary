@@ -1,49 +1,43 @@
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { booksData, deleteBook } from "../api/books.js";
+import { booksData, deleteBook } from "../api/books";
 
 function AdminDashboard() {
   const [books, setBooks] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
+    // Dapatkan data buku saat komponen dimuat
     setBooks(booksData);
   }, []);
 
-  const handleDelete = (id) => {
-    // Tampilkan konfirmasi sebelum menghapus untuk mencegah kesalahan
+  const handleDeleteBook = (id) => {
+    // Konfirmasi sebelum menghapus
     if (window.confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
-      // 1. Hapus buku dari "database"
       deleteBook(id);
-      // 2. Perbarui state lokal untuk me-render ulang UI tanpa reload halaman
-      setBooks(currentBooks => currentBooks.filter(book => book.id !== id));
-      alert("Buku berhasil dihapus.");
-    }
-  };
-
-  const handleLogout = () => {
-    if (window.confirm(" Apakah Anda yakin ingin logout?")) {
-        navigate('/login');
+      // Update tampilan setelah menghapus
+      setBooks(booksData);
     }
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <div className="flex gap-4">
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* Header dashboard dengan tombol tambah dan logout */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+        <h1 className="text-3xl font-bold mb-4 sm:mb-0">Admin Dashboard</h1>
+        
+        <div className="flex gap-3">
           <Link to="/admin/add" className="btn btn-primary">
             Tambah Buku Baru
           </Link>
-          <button onClick={handleLogout} className="btn btn-outline btn-error">
+          <Link to="/" className="btn btn-outline btn-error">
             Logout
-          </button>
+          </Link>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
-          {/* Kepala Tabel */}
+      {/* Tabel buku */}
+      <div className="overflow-x-auto bg-[color:var(--color-base-100)] shadow-md rounded-lg">
+        <table className="table w-full">
           <thead>
             <tr>
               <th>No</th>
@@ -53,27 +47,33 @@ function AdminDashboard() {
               <th>Aksi</th>
             </tr>
           </thead>
-          {/* Badan Tabel */}
           <tbody>
             {books.map((book, index) => (
-              <tr key={book.id}>
-                <th>{index + 1}</th>
+              <tr key={book.id} className={index % 2 === 1 ? "bg-[color:var(--color-base-200)]" : ""}>
+                <td>{index + 1}</td>
                 <td>
-                  <div className="avatar">
-                    <div className="w-16 rounded">
-                      <img src={book.coverImage} alt={`Cover ${book.title}`} />
-                    </div>
+                  <div className="w-16 h-20 overflow-hidden rounded-md">
+                    <img 
+                      src={book.coverImage} 
+                      alt={`Cover ${book.title}`} 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </td>
                 <td>{book.title}</td>
                 <td>{book.author}</td>
-                <td className="flex gap-2">
-                  <Link to={`/admin/edit/${book.id}`} className="btn btn-warning btn-sm">
-                    Edit
-                  </Link>
-                  <button onClick={() => handleDelete(book.id)} className="btn btn-error btn-sm">
-                    Hapus
-                  </button>
+                <td>
+                  <div className="flex gap-2">
+                    <Link to={`/admin/edit/${book.id}`} className="btn btn-warning btn-sm">
+                      Edit
+                    </Link>
+                    <button 
+                      className="btn btn-error btn-sm"
+                      onClick={() => handleDeleteBook(book.id)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
