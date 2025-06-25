@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token,  jwt_required, get_jwt_identity
 from ..models import User, db
 from ..extensions import bcrypt
 
@@ -46,3 +46,25 @@ def login_user():
     access_token = create_access_token(identity=str(user.id))
     
     return jsonify(access_token=access_token), 200
+
+@auth_bp.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    """Endpoint untuk mengambil data profil pengguna yang sedang login."""
+    current_user_id = get_jwt_identity() # Ini adalah string 'id' dari user
+    user = User.query.get(current_user_id)
+
+    if not user:
+        return jsonify({"error": "Pengguna tidak ditemukan"}), 404
+    
+    # Ambil semua ID buku dari daftar favorit pengguna
+    favorite_ids = [book.id for book in user.favorite_books]
+    
+    user_data = {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "is_admin": user.is_admin,
+        "favorites": favorite_ids # Sertakan daftar favorit
+    }
+    return jsonify(user_data), 200

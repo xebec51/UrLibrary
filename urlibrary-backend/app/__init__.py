@@ -5,6 +5,7 @@ from .extensions import db, bcrypt, jwt, migrate
 from .models import User, Book
 from .api.auth import auth_bp
 from .api.books import books_bp
+from .api.favorites import favorites_bp
 
 def create_app():
     app = Flask(__name__)
@@ -19,6 +20,7 @@ def create_app():
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(books_bp, url_prefix='/api')
+    app.register_blueprint(favorites_bp, url_prefix='/api')
 
     # Definisikan semua rute/endpoint di sini
     @app.route("/api/test", methods=['GET'])

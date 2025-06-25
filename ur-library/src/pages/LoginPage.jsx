@@ -1,42 +1,38 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaLock, FaEnvelope, FaSignInAlt, FaBook } from 'react-icons/fa';
+// Impor hook useAuth untuk menggunakan fungsi login yang sesungguhnya
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
-  // State untuk menampung nilai dari input form
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  // State untuk loading saat proses login
+  // Kita bisa pre-fill email dan password admin untuk memudahkan testing
+  const [email, setEmail] = useState('admin@urlibrary.com');
+  const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(false);
-  // State untuk error message
   const [error, setError] = useState('');
 
-  // Hook untuk navigasi/redirect
   const navigate = useNavigate();
+  // Ambil fungsi login dari AuthContext
+  const { login } = useAuth();
 
-  // Fungsi yang akan dijalankan saat tombol login di-klik
-  const handleLogin = (event) => {
-    // Mencegah browser me-reload halaman saat form disubmit
+  // Jadikan fungsi handleLogin async
+  const handleLogin = async (event) => {
     event.preventDefault();
-    
-    // Reset error message
     setError('');
-    // Set loading
     setIsLoading(true);
 
-    // Simulasi proses login yang memakan waktu
-    setTimeout(() => {
-      // --- SIMULASI LOGIN ---
-      if (email === 'admin@urlibrary.com' && password === 'admin123') {
-        // Arahkan ke dashboard admin jika berhasil
-        navigate('/admin/dashboard');
-      } else {
-        // Tampilkan pesan error jika gagal
-        setError('Login gagal! Email atau password salah.');
-      }
-      // Matikan loading
-      setIsLoading(false);
-    }, 1000);
+    // Panggil fungsi login yang sesungguhnya dari context
+    const success = await login({ email, password });
+
+    if (success) {
+      alert('Login Admin berhasil!');
+      // Arahkan ke dashboard admin jika berhasil
+      navigate('/admin/dashboard');
+    } else {
+      setError('Login gagal! Periksa kembali kredensial admin Anda.');
+    }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -53,7 +49,6 @@ function LoginPage() {
                 </p>
               </div>
               
-              {/* Show error message if exists */}
               {error && (
                 <div className="alert alert-error mb-6 shadow-lg">
                   <div>
@@ -63,7 +58,6 @@ function LoginPage() {
                 </div>
               )}
 
-              {/* Form login */}
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div className="form-control">
                   <label className="label">
@@ -109,13 +103,12 @@ function LoginPage() {
                     className={`btn btn-primary btn-block ${isLoading ? 'loading' : ''}`}
                     disabled={isLoading}
                   >
-                    {!isLoading && (
+                    {!isLoading ? (
                       <>
                         <FaSignInAlt />
                         <span>Login</span>
                       </>
-                    )}
-                    {isLoading && "Loading..."}
+                    ) : "Loading..."}
                   </button>
                 </div>
               </form>

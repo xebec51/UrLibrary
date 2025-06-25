@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaBook } from 'react-icons/fa';
-import { useAuth } from '../context/AuthContext'; // <- Ganti import
+import { useAuth } from '../context/AuthContext';
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const { register } = useAuth(); // <- Ambil fungsi dari context
+  const { register, loading } = useAuth(); // Ambil juga state loading
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,7 +19,8 @@ function RegisterPage() {
     setFormData(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // Jadikan fungsi ini async untuk menggunakan await
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -28,18 +29,17 @@ function RegisterPage() {
       return;
     }
     
-    // Gunakan fungsi register dari context
-    const registered = register({ name: formData.name, email: formData.email, password: formData.password });
+    // Gunakan await untuk menunggu hasil dari fungsi register
+    const success = await register({ name: formData.name, email: formData.email, password: formData.password });
 
-    if (registered) {
+    if (success) {
       alert('Registrasi berhasil! Silakan login.');
       navigate('/login-user');
     } else {
-      setError('Email mungkin sudah terdaftar.');
+      setError('Registrasi gagal. Email mungkin sudah terdaftar.');
     }
   };
 
-  // ... JSX lainnya tetap sama
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full bg-[color:var(--color-base-100)] rounded-2xl shadow-xl p-8">
@@ -73,7 +73,9 @@ function RegisterPage() {
             <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Ulangi password" className="input input-bordered w-full" required />
           </div>
           <div className="form-control mt-6">
-            <button type="submit" className="btn btn-primary">Daftar</button>
+            <button type="submit" className={`btn btn-primary ${loading ? 'loading' : ''}`} disabled={loading}>
+                {!loading ? 'Daftar' : 'Mendaftar...'}
+            </button>
           </div>
         </form>
         <p className="text-center mt-4">

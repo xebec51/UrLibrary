@@ -6,7 +6,6 @@ books_bp = Blueprint('books', __name__)
 
 # --- READ ALL (Sudah ada, tidak perlu diubah) ---
 @books_bp.route('/books', methods=['GET'])
-@jwt_required()
 def get_all_books():
     """Endpoint untuk mengambil semua data buku."""
     books = Book.query.all()
@@ -21,7 +20,6 @@ def get_all_books():
 
 # --- READ ONE ---
 @books_bp.route('/books/<int:book_id>', methods=['GET'])
-@jwt_required()
 def get_one_book(book_id):
     """Endpoint untuk mengambil detail satu buku."""
     book = Book.query.get_or_404(book_id)

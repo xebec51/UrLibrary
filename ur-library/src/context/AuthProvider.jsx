@@ -1,67 +1,94 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext'; // <- Impor context dari file sebelah
+import { AuthContext } from './AuthContext'; 
 import { 
-  getCurrentUser, 
-  loginUser as apiLogin, 
-  logoutUser as apiLogout,
-  registerUser as apiRegister,
-  toggleFavoriteBook as apiToggleFavorite
-} from '../api/users';
+    loginUser as apiLogin, 
+    registerUser as apiRegister,
+    getUserProfile,
+    toggleFavoriteBook as apiToggleFavorite 
+} from '../api/apiService';
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem('accessToken'));
+  const [currentUser, setCurrentUser] = useState(null); 
+  const [authLoading, setAuthLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-    }
-    setLoading(false);
-  }, []);
-  
-  const login = (credentials) => {
-    const user = apiLogin(credentials);
-    if (user) {
-      setCurrentUser(user);
-      navigate('/');
-      return user;
-    }
-    return null;
-  };
-  
+  // Kita akan menggunakan `logout` di dalam useEffect, jadi kita perlu
+  // membungkusnya dengan useCallback atau mendefinisikannya di dalam hook
+  // untuk menghindari warning. Cara termudah adalah menambahkannya ke dependency array.
   const logout = () => {
-    apiLogout();
+    setAuthToken(null);
     setCurrentUser(null);
     navigate('/');
   };
 
-  const register = (newUser) => {
-    return apiRegister(newUser);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+        if (token) {
+            try {
+                const profile = await getUserProfile();
+                setCurrentUser(profile);
+            } catch (error) {
+                console.error("Token tidak valid, logout...", error);
+                logout();
+            }
+        }
+        setAuthLoading(false);
+    };
+    fetchUserProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  const setAuthToken = (newToken) => {
+    setToken(newToken);
+    if (newToken) {
+      localStorage.setItem('accessToken', newToken);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  };
+
+  const login = async (credentials) => {
+    try {
+      const data = await apiLogin(credentials);
+      setAuthToken(data.access_token);
+      return true;
+    } catch (error) {
+      console.error("Login failed:", error);
+      return false;
+    }
   };
   
-  const toggleFavorite = (bookId) => {
-    if (!currentUser) return;
-    apiToggleFavorite(currentUser.id, bookId);
-    const updatedUser = getCurrentUser();
-    setCurrentUser(updatedUser);
+  const register = async (newUser) => {
+    try {
+        await apiRegister(newUser);
+        return true;
+    } catch (error) {
+        console.error("Registration failed:", error);
+        return false;
+    }
+  };
+  
+  const toggleFavorite = async (bookId) => {
+    if (!token) return;
+    try {
+        await apiToggleFavorite(bookId);
+        const profile = await getUserProfile();
+        setCurrentUser(profile);
+    } catch (error) {
+        console.error("Failed to toggle favorite:", error);
+    }
   };
   
   const value = {
-    currentUser,
-    isAuthenticated: !!currentUser,
-    loading,
-    login,
-    logout,
-    register,
-    toggleFavorite
+    token, currentUser, isAuthenticated: !!token, loading: authLoading,
+    login, logout, register, toggleFavorite
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {!authLoading && children}
     </AuthContext.Provider>
   );
 }

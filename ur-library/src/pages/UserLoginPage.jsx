@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaLock, FaEnvelope, FaSignInAlt, FaBook } from 'react-icons/fa';
-import { useAuth } from '../context/AuthContext'; // <- Gunakan hook kustom kita
+import { useAuth } from '../context/AuthContext';
 
 function UserLoginPage() {
   const [email, setEmail] = useState('');
@@ -9,27 +9,27 @@ function UserLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { login } = useAuth(); // <- Ambil fungsi login dari context
+  const { login } = useAuth();
 
-  const handleLogin = (event) => {
+  // Jadikan fungsi ini async untuk menggunakan await
+  const handleLogin = async (event) => {
     event.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Simulasi delay
-    setTimeout(() => {
-      const user = login({ email, password }); // <- Gunakan fungsi dari context
-      if (user) {
-        alert('Login berhasil!');
-        // Navigasi sudah dihandle di dalam fungsi login context
-      } else {
-        setError('Login gagal! Email atau password salah.');
-      }
-      setIsLoading(false);
-    }, 1000);
+    // Gunakan await untuk menunggu hasil dari fungsi login
+    const success = await login({ email, password });
+    
+    if (success) {
+      alert('Login berhasil!');
+      // Navigasi sudah dihandle di dalam fungsi login context
+    } else {
+      setError('Login gagal! Periksa kembali email atau password Anda.');
+    }
+    
+    setIsLoading(false);
   };
 
-  // ... (JSX tetap sama)
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full bg-[color:var(--color-base-100)] rounded-2xl shadow-xl p-8">
