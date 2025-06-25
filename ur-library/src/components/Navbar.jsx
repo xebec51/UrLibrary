@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { FaBook } from "react-icons/fa";
-import { useAuth } from "../context/AuthContext"; // <- Gunakan hook kustom kita
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const location = useLocation();
-  const { currentUser, logout } = useAuth(); // <- Ambil data dari context
+  // --- PERUBAHAN DI SINI ---
+  const { user, logout } = useAuth(); // Ganti 'currentUser' menjadi 'user'
 
   const handleLogout = () => {
     logout();
@@ -22,29 +23,34 @@ function Navbar() {
     <div className={navbarClass}>
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="w-full flex flex-row items-center justify-between">
-          {/* ... bagian kiri: logo & beranda ... */}
           <div className="flex flex-row items-center gap-8">
-            <Link to="/" className="flex items-center gap-2">
-              <FaBook className="text-[color:var(--color-primary)]" />
-              <span className="text-gradient font-bold text-lg">UrLibrary</span>
+            <Link to="/" className="flex items-center gap-2 font-bold">
+              <FaBook />
+              <span>UrLibrary</span>
             </Link>
-            
-            <Link to="/" className="hover:text-[color:var(--color-primary)] transition-colors">
+            <Link to="/" className="hidden md:block hover:text-[color:var(--color-primary)] transition-colors">
               Beranda
             </Link>
             
-            {currentUser && (
-              <Link to="/my-favorites" className="hover:text-[color:var(--color-primary)] transition-colors">
+            {/* --- PERUBAHAN DI SINI --- */}
+            {user && (
+              <Link to="/my-favorites" className="hidden md:block hover:text-[color:var(--color-primary)] transition-colors">
                 Favorit Saya
               </Link>
             )}
           </div>
           
-          {/* ... bagian kanan: tombol dinamis ... */}
           <div className="flex items-center gap-3">
-            {currentUser ? (
+            {/* --- PERUBAHAN DI SINI --- */}
+            {user ? (
               <>
-                <span className="font-medium text-sm hidden sm:block">Halo, {currentUser.name}</span>
+                {/* --- DAN DI SINI --- */}
+                {user.is_admin && (
+                  <Link to="/admin/dashboard" className="btn btn-ghost btn-sm h-8 min-h-8 px-4">
+                    Admin Dashboard
+                  </Link>
+                )}
+                <span className="font-medium text-sm hidden sm:block">Halo, {user.name}</span>
                 <button onClick={handleLogout} className="btn btn-outline btn-error btn-sm h-8 min-h-8 px-4">
                   Logout
                 </button>
@@ -62,7 +68,8 @@ function Navbar() {
               )
             )}
             
-            {!currentUser && !isAdminPage && !isAuthPage && (
+            {/* --- DAN DI SINI --- */}
+            {!user && !isAdminPage && !isAuthPage && (
                <Link to="/login" className="btn btn-outline btn-sm h-8 min-h-8 px-4 hidden md:flex">
                 Login Admin
               </Link>

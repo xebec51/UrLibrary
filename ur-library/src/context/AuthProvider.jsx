@@ -10,16 +10,13 @@ import {
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('accessToken'));
-  const [currentUser, setCurrentUser] = useState(null); 
+  const [user, setUser] = useState(null); 
   const [authLoading, setAuthLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Kita akan menggunakan `logout` di dalam useEffect, jadi kita perlu
-  // membungkusnya dengan useCallback atau mendefinisikannya di dalam hook
-  // untuk menghindari warning. Cara termudah adalah menambahkannya ke dependency array.
   const logout = () => {
     setAuthToken(null);
-    setCurrentUser(null);
+    setUser(null);
     navigate('/');
   };
 
@@ -28,7 +25,7 @@ export function AuthProvider({ children }) {
         if (token) {
             try {
                 const profile = await getUserProfile();
-                setCurrentUser(profile);
+                setUser(profile);
             } catch (error) {
                 console.error("Token tidak valid, logout...", error);
                 logout();
@@ -75,14 +72,14 @@ export function AuthProvider({ children }) {
     try {
         await apiToggleFavorite(bookId);
         const profile = await getUserProfile();
-        setCurrentUser(profile);
+        setUser(profile);
     } catch (error) {
         console.error("Failed to toggle favorite:", error);
     }
   };
   
   const value = {
-    token, currentUser, isAuthenticated: !!token, loading: authLoading,
+    token, user, isAuthenticated: !!token, loading: authLoading,
     login, logout, register, toggleFavorite
   };
 
