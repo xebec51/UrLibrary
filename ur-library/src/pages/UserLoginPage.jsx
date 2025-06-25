@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaLock, FaEnvelope, FaSignInAlt, FaBook } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,8 +8,8 @@ function UserLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   // Jadikan fungsi ini async untuk menggunakan await
   const handleLogin = async (event) => {
@@ -22,7 +22,7 @@ function UserLoginPage() {
     
     if (success) {
       alert('Login berhasil!');
-      // Navigasi sudah dihandle di dalam fungsi login context
+      navigate('/');
     } else {
       setError('Login gagal! Periksa kembali email atau password Anda.');
     }
