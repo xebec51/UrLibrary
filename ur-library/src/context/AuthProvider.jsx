@@ -1,91 +1,113 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './AuthContext'; 
-import { 
-    loginUser as apiLogin, 
+import { AuthContext } from './AuthContext';
+import {
+    loginUser as apiLogin,
     registerUser as apiRegister,
     getUserProfile,
-    toggleFavoriteBook as apiToggleFavorite 
+    updateUserProfile as apiUpdateProfile,
+    toggleFavoriteBook as apiToggleFavorite
 } from '../api/apiService';
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('accessToken'));
-  const [user, setUser] = useState(null); 
-  const [authLoading, setAuthLoading] = useState(true);
-  const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('accessToken'));
+    const [authLoading, setAuthLoading] = useState(true);
+    const navigate = useNavigate();
 
-  const logout = () => {
-    setAuthToken(null);
-    setUser(null);
-    navigate('/');
-  };
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-        if (token) {
-            try {
-                const profile = await getUserProfile();
-                setUser(profile);
-            } catch (error) {
-                console.error("Token tidak valid, logout...", error);
-                logout();
-            }
+    const setAuthToken = (newToken) => {
+        setToken(newToken);
+        if (newToken) {
+            localStorage.setItem('accessToken', newToken);
+        } else {
+            localStorage.removeItem('accessToken');
         }
-        setAuthLoading(false);
     };
-    fetchUserProfile();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
 
-  const setAuthToken = (newToken) => {
-    setToken(newToken);
-    if (newToken) {
-      localStorage.setItem('accessToken', newToken);
-    } else {
-      localStorage.removeItem('accessToken');
-    }
-  };
+    const logout = useCallback(() => {
+        setAuthToken(null);
+        setUser(null);
+        navigate('/');
+    }, [navigate]);
+    
+    useEffect(() => {
+        const checkUserSession = async () => {
+            if (token) {
+                try {
+                    const profile = await getUserProfile(token);
+                    setUser(profile);
+                } catch (error) { // <-- Variabel 'error' sekarang digunakan
+                    console.error("Gagal memvalidasi sesi:", error);
+                    logout();
+                }
+            }
+            setAuthLoading(false);
+        };
+        checkUserSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  const login = async (credentials) => {
-    try {
-      const data = await apiLogin(credentials);
-      setAuthToken(data.access_token);
-      return true;
-    } catch (error) {
-      console.error("Login failed:", error);
-      return false;
-    }
-  };
-  
-  const register = async (newUser) => {
-    try {
-        await apiRegister(newUser);
-        return true;
-    } catch (error) {
-        console.error("Registration failed:", error);
-        return false;
-    }
-  };
-  
-  const toggleFavorite = async (bookId) => {
-    if (!token) return;
-    try {
-        await apiToggleFavorite(bookId);
-        const profile = await getUserProfile();
-        setUser(profile);
-    } catch (error) {
-        console.error("Failed to toggle favorite:", error);
-    }
-  };
-  
-  const value = {
-    token, user, isAuthenticated: !!token, loading: authLoading,
-    login, logout, register, toggleFavorite
-  };
+    const login = async (credentials) => {
+        try {
+            const response = await apiLogin(credentials);
+            setAuthToken(response.access_token);
+            setUser(response.user);
+            return true;
+        } catch (error) { // <-- Variabel 'error' sekarang digunakan
+            console.error("Gagal login:", error);
+            logout();
+            return false;
+        }
+    };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!authLoading && children}
-    </AuthContext.Provider>
-  );
+    const register = async (newUser) => {
+        try {
+            await apiRegister(newUser);
+            return true;
+        } catch (error) { // <-- Variabel 'error' sekarang digunakan
+            console.error("Gagal registrasi:", error);
+            return false;
+        }
+    };
+    
+    const updateUser = async (userData) => {
+        if (!token) throw new Error("Tidak ada token untuk otentikasi");
+        const updatedUser = await apiUpdateProfile(userData, token);
+        setUser(updatedUser);
+        return updatedUser;
+    };
+
+    const refreshUser = useCallback(async () => {
+        if (!token) return;
+        try {
+            const profile = await getUserProfile(token);
+            setUser(profile);
+        } catch (error) { // <-- Variabel 'error' sekarang digunakan
+            console.error("Gagal refresh user:", error);
+            logout();
+        }
+    }, [token, logout]);
+
+    const toggleFavorite = async (bookId) => {
+        if (!token) return;
+        try {
+            await apiToggleFavorite(bookId, token);
+            await refreshUser();
+        } catch (error) { // <-- Variabel 'error' sekarang digunakan
+            console.error("Gagal toggle favorit:", error);
+        }
+    };
+
+    const value = {
+        token, user, authLoading,
+        login, logout, register,
+        toggleFavorite, refreshUser,
+        updateUser
+    };
+
+    return (
+        <AuthContext.Provider value={value}>
+            {!authLoading ? children : <div className="flex justify-center items-center h-screen"><span className="loading loading-spinner loading-lg"></span></div>}
+        </AuthContext.Provider>
+    );
 }

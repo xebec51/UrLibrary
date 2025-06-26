@@ -1,63 +1,45 @@
 const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
-// Fungsi helper untuk mendapatkan token dari localStorage
-const getAuthToken = () => {
-    return localStorage.getItem('accessToken');
-};
-
-// Fungsi helper generik untuk membuat request ke API
-const apiRequest = async (endpoint, method, body = null) => {
+// Fungsi helper generik
+const apiRequest = async (endpoint, method, body = null, token = null) => {
     const headers = {
         'Content-Type': 'application/json',
     };
-    const token = getAuthToken();
+    
+    // Logika baru: Prioritaskan token yang disuntikkan
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const config = {
-        method: method,
-        headers: headers,
-    };
-
+    const config = { method, headers };
     if (body) {
         config.body = JSON.stringify(body);
     }
 
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-        
-        // Cek jika response tidak memiliki body (misal, 204 No Content)
-        if (response.status === 204) {
-            return null;
-        }
-
-        const data = await response.json();
-
+        const data = response.status === 204 ? null : await response.json();
         if (!response.ok) {
-            // Lemparkan error dengan pesan dari server jika ada
-            throw new Error(data.error || data.msg || 'Terjadi kesalahan pada server');
+            throw new Error(data?.error || data?.msg || 'Terjadi kesalahan pada server');
         }
-
         return data;
     } catch (error) {
-        console.error('API request error:', error);
+        console.error(`[API Error] ${method} ${endpoint}:`, error);
         throw error;
     }
 };
 
-// --- AUTH ENDPOINTS ---
+// Fungsi API sekarang menerima token sebagai argumen terakhir
 export const loginUser = (credentials) => apiRequest('/auth/login', 'POST', credentials);
 export const registerUser = (userData) => apiRequest('/auth/register', 'POST', userData);
-export const getUserProfile = () => apiRequest('/auth/profile', 'GET');
+export const getUserProfile = (token) => apiRequest('/auth/profile', 'GET', null, token);
+export const updateUserProfile = (userData, token) => apiRequest('/auth/profile', 'PUT', userData, token);
 
-// --- BOOK ENDPOINTS ---
 export const getAllBooks = () => apiRequest('/books', 'GET');
 export const getBookById = (id) => apiRequest(`/books/${id}`, 'GET');
-export const createBook = (bookData) => apiRequest('/books', 'POST', bookData);
-export const updateBook = (id, bookData) => apiRequest(`/books/${id}`, 'PUT', bookData);
-export const deleteBook = (id) => apiRequest(`/books/${id}`, 'DELETE');
+export const createBook = (bookData, token) => apiRequest('/books', 'POST', bookData, token);
+export const updateBook = (id, bookData, token) => apiRequest(`/books/${id}`, 'PUT', bookData, token);
+export const deleteBook = (id, token) => apiRequest(`/books/${id}`, 'DELETE', token);
 
-// --- FAVORITES ENDPOINTS ---
-export const getFavoriteBooks = () => apiRequest('/favorites', 'GET');
-export const toggleFavoriteBook = (bookId) => apiRequest(`/books/${bookId}/favorite`, 'POST');
+export const getFavoriteBooks = (token) => apiRequest('/favorites', 'GET', null, token);
+export const toggleFavoriteBook = (bookId, token) => apiRequest(`/books/${bookId}/favorite`, 'POST', null, token);
