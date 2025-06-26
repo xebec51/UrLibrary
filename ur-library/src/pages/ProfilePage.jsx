@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaUserEdit, FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
+import { FaUserEdit, FaEnvelope, FaLock, FaUser, FaKey } from 'react-icons/fa';
 
 function ProfilePage() {
-  // --- PERBAIKAN DI SINI: Tambahkan 'updateUser' ---
   const { user, authLoading, updateUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
+    currentPassword: '', // 1. State baru untuk password lama
+    newPassword: '',     // 2. Ganti nama state 'password' menjadi 'newPassword'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -18,7 +18,8 @@ function ProfilePage() {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        password: '',
+        currentPassword: '',
+        newPassword: '',
       });
     }
   }, [user]);
@@ -32,21 +33,31 @@ function ProfilePage() {
     setIsLoading(true);
     setMessage('');
 
+    // 3. Siapkan data untuk dikirim ke backend
     const dataToUpdate = {
       name: formData.name,
       email: formData.email,
     };
-    if (formData.password) {
-      dataToUpdate.password = formData.password;
+    
+    // Hanya kirim data password jika pengguna ingin mengubahnya
+    if (formData.newPassword) {
+      if (!formData.currentPassword) {
+        setMessage('Gagal: Masukkan password lama Anda untuk mengatur password baru.');
+        setIsLoading(false);
+        return;
+      }
+      dataToUpdate.current_password = formData.currentPassword;
+      dataToUpdate.new_password = formData.newPassword;
     }
 
     try {
-      // Sekarang 'updateUser' sudah dikenali karena diambil dari context
       await updateUser(dataToUpdate); 
       setMessage('Profil berhasil diperbarui!');
-      setFormData(prev => ({ ...prev, password: '' }));
+      // Kosongkan semua field password setelah berhasil
+      setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
     } catch (error) {
-      setMessage('Gagal memperbarui profil. Coba lagi.');
+      // Menampilkan pesan error dari backend jika ada
+      setMessage(`Gagal memperbarui profil: ${error.message}`);
       console.error('Update profile error:', error);
     } finally {
       setIsLoading(false);
@@ -57,7 +68,6 @@ function ProfilePage() {
     return <div className="text-center p-12">Memuat...</div>;
   }
 
-  // Sisa kode JSX tidak perlu diubah
   return (
     <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="flex items-center gap-4 mb-8">
@@ -73,47 +83,47 @@ function ProfilePage() {
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Input Nama dan Email (tidak berubah) */}
             <div className="form-control">
-              <label className="label">
-                <span className="label-text flex items-center gap-2"><FaUser /> Nama Lengkap</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input input-bordered"
-                required
-              />
+              <label className="label"><span className="label-text flex items-center gap-2"><FaUser /> Nama Lengkap</span></label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} className="input input-bordered" required />
             </div>
-
             <div className="form-control">
-              <label className="label">
-                <span className="label-text flex items-center gap-2"><FaEnvelope /> Email</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input input-bordered"
-                required
-              />
+              <label className="label"><span className="label-text flex items-center gap-2"><FaEnvelope /> Email</span></label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} className="input input-bordered" required />
             </div>
+            
+            <div className="divider">Ubah Password (Opsional)</div>
 
+            {/* --- PERUBAHAN DI SINI --- */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text flex items-center gap-2"><FaLock /> Password Baru (Opsional)</span>
+                <span className="label-text flex items-center gap-2"><FaKey /> Password Lama</span>
               </label>
               <input
                 type="password"
-                name="password"
-                value={formData.password}
+                name="currentPassword"
+                value={formData.currentPassword}
                 onChange={handleChange}
-                placeholder="Isi untuk mengganti password"
+                placeholder="Masukkan password Anda saat ini"
                 className="input input-bordered"
               />
             </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text flex items-center gap-2"><FaLock /> Password Baru</span>
+              </label>
+              <input
+                type="password"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                placeholder="Isi untuk mengganti password lama"
+                className="input input-bordered"
+              />
+            </div>
+            {/* --------------------------- */}
 
             <div className="form-control mt-6">
               <button type="submit" className="btn btn-primary" disabled={isLoading}>

@@ -67,7 +67,8 @@ def get_profile():
     }
     return jsonify(user_data), 200
 
-# --- FUNGSI UPDATE PROFILE (Sudah Benar) ---
+# Di dalam file: urlibrary-backend/app/api/auth.py
+
 @auth_bp.route('/profile', methods=['PUT'])
 @jwt_required()
 def update_profile():
@@ -75,18 +76,38 @@ def update_profile():
     user = User.query.get(current_user_id)
     if not user:
         return jsonify({"msg": "User not found"}), 404
+
     data = request.get_json()
+    
+    # Update nama dan email
     user.name = data.get('name', user.name)
     user.email = data.get('email', user.email)
-    if 'password' in data and data['password']:
-        user.password = data['password']
-    db.session.commit()
-    # Kembalikan juga data favorit agar state di frontend tetap konsisten
-    user_data = {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-        "is_admin": user.is_admin,
-        "favorites": [book.id for book in user.favorite_books]
-    }
-    return jsonify(user_data), 200
+
+    # --- PERBAIKAN LOGIKA PASSWORD DI SINI ---
+    # Cek jika pengguna ingin mengubah password
+    if 'new_password' in data and data['new_password']:
+        # Jika ingin ubah password, password lama wajib diisi
+        if 'current_password' not in data or not data['current_password']:
+            return jsonify({"error": "Password lama wajib diisi untuk mengatur password baru."}), 400
+        
+        # Verifikasi password lama
+        if not user.check_password(data['current_password']):
+            return jsonify({"error": "Password lama yang Anda masukkan salah."}), 401 # Unauthorized
+        
+        # Jika password lama benar, hash dan set password baru
+        user.password = data['new_password']
+
+    try:
+        db.session.commit()
+        # Kembalikan data profil yang sudah diperbarui
+        user_data = {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "is_admin": user.is_admin,
+            "favorites": [book.id for book in user.favorite_books]
+        }
+        return jsonify(user_data), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Gagal memperbarui profil", "error": str(e)}), 500
