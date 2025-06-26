@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// --- PERBAIKAN 1: Hapus 'useNavigate' dari impor ---
 import { useAuth } from '../context/AuthContext';
-// Ganti impor lama dengan apiService
 import { getFavoriteBooks } from '../api/apiService';
 import BookCard from '../components/BookCard';
 import { FaHeart } from 'react-icons/fa';
@@ -9,22 +8,22 @@ import { FaHeart } from 'react-icons/fa';
 function FavoritesPage() {
   const [favoriteBooks, setFavoriteBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { user, token } = useAuth();
+  // --- PERBAIKAN 2: Hapus deklarasi 'navigate' yang tidak terpakai ---
 
   useEffect(() => {
-    // Jika tidak login, alihkan ke halaman login
-    if (!isAuthenticated) {
-      alert("Anda harus login untuk mengakses halaman ini.");
-      navigate('/login-user');
-      return; // Hentikan eksekusi
+    if (!user || !token) {
+      // Kita tidak perlu melakukan apa-apa di sini, biarkan PrivateRoute bekerja
+      setLoading(false); // Pastikan loading berhenti jika tidak ada user
+      return;
     }
 
     const fetchFavorites = async () => {
+      // Kita sudah di dalam 'if (token)', jadi kita bisa asumsikan token ada
       try {
         setLoading(true);
-        const data = await getFavoriteBooks();
-        setFavoriteBooks(data.books || []);
+        const data = await getFavoriteBooks(token);
+        setFavoriteBooks(data || []);
       } catch (error) {
         console.error("Gagal memuat favorit:", error);
       } finally {
@@ -33,14 +32,15 @@ function FavoritesPage() {
     };
 
     fetchFavorites();
-  }, [isAuthenticated, navigate]);
-
-  if (!isAuthenticated) {
-    return null; // Jangan render apapun selagi redirect
-  }
+  // --- PERBAIKAN 3: Hapus komentar eslint-disable dan sesuaikan dependency ---
+  }, [user, token]);
 
   if (loading) {
-      return <div className="text-center p-12">Memuat buku favorit...</div>;
+      return (
+        <div className="flex justify-center items-center h-[50vh]">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      );
   }
 
   return (
