@@ -1,6 +1,5 @@
 from .extensions import db, bcrypt 
 
-# Tabel asosiasi untuk relasi many-to-many antara User dan Book (untuk fitur favorit)
 favorites = db.Table('favorites',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'), primary_key=True)
@@ -37,3 +36,15 @@ class Book(db.Model):
     description = db.Column(db.Text, nullable=False)
     coverImage = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(50), nullable=False)
+
+    def to_dict(self):
+        """Mengubah objek Book menjadi dictionary."""
+        return {
+            'id': self.id,
+            'title': self.title,
+            'author': self.author,
+            'year': self.year,
+            'description': self.description,
+            'coverImage': self.coverImage,
+            'category': self.category
+        }
