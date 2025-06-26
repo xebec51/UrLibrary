@@ -65,7 +65,7 @@ Berikut adalah langkah-langkah untuk menjalankan proyek ini secara lokal.
 ### 1\. Kloning Repository
 
 ```bash
-git clone https://github.com/[NAMA_PENGGUNA_ANDA]/UrLibrary.git
+git clone https://github.com/xebec51/UrLibrary.git
 cd UrLibrary
 ```
 
