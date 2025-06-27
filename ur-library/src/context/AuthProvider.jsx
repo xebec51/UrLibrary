@@ -89,12 +89,23 @@ export function AuthProvider({ children }) {
     }, [token, logout]);
 
     const toggleFavorite = async (bookId) => {
-        if (!token) return;
+        if (!token || !user) return;
+        
+        const isCurrentlyFavorite = user.favorites.includes(bookId);
+
+        const newFavorites = isCurrentlyFavorite
+            ? user.favorites.filter(id => id !== bookId)
+            : [...user.favorites, bookId];
+
+        setUser({ ...user, favorites: newFavorites });
+
         try {
             await apiToggleFavorite(bookId, token);
-            await refreshUser();
-        } catch (error) { // <-- Variabel 'error' sekarang digunakan
+            await refreshUser(); 
+        } catch (error) {
             console.error("Gagal toggle favorit:", error);
+            setUser(user);
+            alert("Gagal memperbarui favorit. Coba lagi.");
         }
     };
 

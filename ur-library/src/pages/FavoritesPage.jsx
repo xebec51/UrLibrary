@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-// --- PERBAIKAN 1: Hapus 'useNavigate' dari impor ---
 import { useAuth } from '../context/AuthContext';
 import { getFavoriteBooks } from '../api/apiService';
 import BookCard from '../components/BookCard';
@@ -9,49 +8,54 @@ function FavoritesPage() {
   const [favoriteBooks, setFavoriteBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, token } = useAuth();
-  // --- PERBAIKAN 2: Hapus deklarasi 'navigate' yang tidak terpakai ---
 
   useEffect(() => {
-    if (!user || !token) {
-      // Kita tidak perlu melakukan apa-apa di sini, biarkan PrivateRoute bekerja
-      setLoading(false); // Pastikan loading berhenti jika tidak ada user
-      return;
-    }
-
     const fetchFavorites = async () => {
-      // Kita sudah di dalam 'if (token)', jadi kita bisa asumsikan token ada
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const data = await getFavoriteBooks(token);
+        // --- PERBAIKAN: API sekarang mengembalikan array langsung ---
         setFavoriteBooks(data || []);
       } catch (error) {
         console.error("Gagal memuat favorit:", error);
+        setFavoriteBooks([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchFavorites();
-  // --- PERBAIKAN 3: Hapus komentar eslint-disable dan sesuaikan dependency ---
-  }, [user, token]);
+  }, [token]);
 
   if (loading) {
-      return (
-        <div className="flex justify-center items-center h-[50vh]">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      );
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-xl text-gray-500">Silakan login untuk melihat buku favorit Anda.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center mb-8 border-b pb-4">
-        <FaHeart className="text-red-500 mr-3 text-3xl" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex items-center gap-3 mb-8 border-b border-base-300 pb-4">
+        <FaHeart className="text-red-500 text-3xl" />
         <h1 className="text-4xl font-bold">Buku Favorit Saya</h1>
       </div>
 
       {favoriteBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {favoriteBooks.map((book) => (
             <BookCard 
               key={book.id} 
@@ -63,9 +67,9 @@ function FavoritesPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
-          <p className="text-xl text-gray-500">Anda belum memiliki buku favorit.</p>
-          <p className="text-gray-400 mt-2">Cari buku yang Anda suka dan tambahkan ke favorit!</p>
+        <div className="text-center py-20 bg-base-200 rounded-lg">
+          <p className="text-xl text-base-content/80">Anda belum memiliki buku favorit.</p>
+          <p className="text-base-content/60 mt-2">Cari buku yang Anda suka dan tambahkan ke favorit!</p>
         </div>
       )}
     </div>
