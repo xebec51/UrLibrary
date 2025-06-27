@@ -1,9 +1,10 @@
+// mengimpor fungsi untuk membuat context dan hook untuk menggunakan context
 import { createContext, useContext } from 'react';
 
-// 1. Membuat dan mengekspor Context
+// membuat context untuk autentikasi yang dapat digunakan di seluruh aplikasi
 export const AuthContext = createContext();
 
-// 2. Membuat dan mengekspor Hook untuk kemudahan penggunaan
+// hook custom untuk mengakses context autentikasi dengan mudah
 export const useAuth = () => {
   return useContext(AuthContext);
 };

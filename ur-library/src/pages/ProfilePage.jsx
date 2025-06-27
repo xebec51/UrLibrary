@@ -83,7 +83,6 @@ function ProfilePage() {
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Input Nama dan Email (tidak berubah) */}
             <div className="form-control">
               <label className="label"><span className="label-text flex items-center gap-2"><FaUser /> Nama Lengkap</span></label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} className="input input-bordered" required />
@@ -95,7 +94,6 @@ function ProfilePage() {
             
             <div className="divider">Ubah Password (Opsional)</div>
 
-            {/* --- PERUBAHAN DI SINI --- */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text flex items-center gap-2"><FaKey /> Password Lama</span>
@@ -123,7 +121,6 @@ function ProfilePage() {
                 className="input input-bordered"
               />
             </div>
-            {/* --------------------------- */}
 
             <div className="form-control mt-6">
               <button type="submit" className="btn btn-primary" disabled={isLoading}>

@@ -1,10 +1,12 @@
+// komponen untuk menampilkan navigasi halaman dengan tombol prev/next dan nomor halaman
 function Pagination({ currentPage, totalPages, onPageChange }) {
+  // membuat array berisi nomor-nomor halaman
   const pageNumbers = [];
   for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
-  // Jangan tampilkan pagination jika hanya ada satu halaman
+  // jangan tampilkan pagination jika hanya ada satu halaman atau kurang
   if (totalPages <= 1) {
     return null;
   }
@@ -12,7 +14,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   return (
     <div className="flex justify-center mt-8">
       <div className="join">
-        {/* Tombol Sebelumnya */}
+        {/* tombol untuk ke halaman sebelumnya */}
         <button 
           className="join-item btn"
           onClick={() => onPageChange(currentPage - 1)}
@@ -21,7 +23,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           «
         </button>
 
-        {/* Tombol Angka Halaman */}
+        {/* tombol untuk setiap nomor halaman */}
         {pageNumbers.map(number => (
           <button 
             key={number}
@@ -32,7 +34,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           </button>
         ))}
         
-        {/* Tombol Selanjutnya */}
+        {/* tombol untuk ke halaman selanjutnya */}
         <button 
           className="join-item btn"
           onClick={() => onPageChange(currentPage + 1)}
