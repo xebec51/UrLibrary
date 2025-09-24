@@ -138,7 +138,7 @@ Anda perlu menjalankan kedua server secara bersamaan di terminal yang berbeda.
     # Aplikasi akan berjalan di http://localhost:5173
     ```
 
-Buka `http://localhost:5173` di browser Anda untuk melihat aplikasi.
+Buka `http://localhost:5173` di browser Anda untuk melihat aplikasi secara live.
 
 ## 👨‍💻 Kontributor
   - **Muh. Rinaldi Ruslan** - (H071231074)
