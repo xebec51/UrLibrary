@@ -1,4 +1,3 @@
-// mengimpor komponen untuk navigasi dan routing dari react-router-dom
 import { Navigate, Outlet } from 'react-router-dom';
 // mengimpor hook untuk mengakses konteks autentikasi
 import { useAuth } from '../context/AuthContext';
