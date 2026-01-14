@@ -1,5 +1,4 @@
 import { Navigate, Outlet } from 'react-router-dom';
-// mengimpor hook untuk mengakses konteks autentikasi
 import { useAuth } from '../context/AuthContext';
 
 // komponen untuk melindungi rute yang hanya bisa diakses oleh admin
