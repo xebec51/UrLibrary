@@ -6,7 +6,7 @@ export let booksData = [
     year: 2005,
     description: "Sebuah novel yang mengisahkan tentang perjuangan 10 anak dari keluarga miskin yang bersekolah di sebuah sekolah Muhammadiyah di Belitung.",
     coverImage: "https://th.bing.com/th/id/OIP.4Kjz9sL5EA_Y-x71BVoxKgAAAA?r=0&rs=1&pid=ImgDetMain",
-    category: "Novel" // <- Tambahkan kategori
+    category: "Novel"
   },
   {
     id: 2,
