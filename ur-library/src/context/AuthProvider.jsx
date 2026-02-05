@@ -1,4 +1,3 @@
-// mengimpor hooks react untuk state management dan effect
 import { useState, useEffect, useCallback } from 'react';
 // mengimpor hook untuk navigasi programmatik
 import { useNavigate } from 'react-router-dom';
