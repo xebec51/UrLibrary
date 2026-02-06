@@ -1,4 +1,3 @@
-// mengimpor fungsi untuk membuat context dan hook untuk menggunakan context
 import { createContext, useContext } from 'react';
 
 // membuat context untuk autentikasi yang dapat digunakan di seluruh aplikasi
