@@ -1,4 +1,3 @@
-// mengimpor komponen untuk navigasi dan mendapatkan lokasi url saat ini
 import { Link, useLocation } from "react-router-dom";
 // mengimpor ikon buku dan user circle untuk ui navbar
 import { FaBook, FaUserCircle } from "react-icons/fa"; // Pastikan FaUserCircle diimpor
