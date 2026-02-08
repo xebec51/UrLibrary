@@ -1,4 +1,3 @@
-// mengimpor hook untuk state management
 import { useState } from 'react';
 // mengimpor hook untuk navigasi programmatik
 import { useNavigate } from 'react-router-dom';
