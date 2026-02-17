@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-# Muat environment variables dari file .env
 load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
