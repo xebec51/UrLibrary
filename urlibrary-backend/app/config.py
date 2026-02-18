@@ -8,7 +8,6 @@ basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 class Config:
     """Kumpulan konfigurasi untuk aplikasi Flask."""
     
-    # Konfigurasi untuk SQLAlchemy
     # Menggunakan path absolut untuk memastikan database selalu ditemukan.
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'instance', 'urlibrary.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
