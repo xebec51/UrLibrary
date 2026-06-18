@@ -17,3 +17,11 @@
 - Late returns create an `UNPAID` fine using `LibrarySetting.dailyFineAmount`.
 - If the title has a pending reservation, the returned copy becomes `RESERVED` and the first reservation becomes `READY_FOR_PICKUP`.
 - Return processing writes notifications and audit logs.
+
+## Reservations
+
+- Reservations are created at title level and use FIFO queue positions.
+- Members can cancel their own pending reservations.
+- Staff can mark the first pending reservation as `READY_FOR_PICKUP` when a copy is available.
+- Ready reservations receive an expiry timestamp based on `LibrarySetting.reservationExpiryDays`.
+- Cancelled reservations trigger queue resequencing for remaining pending holds.
