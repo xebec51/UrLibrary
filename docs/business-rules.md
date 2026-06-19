@@ -25,3 +25,11 @@
 - Staff can mark the first pending reservation as `READY_FOR_PICKUP` when a copy is available.
 - Ready reservations receive an expiry timestamp based on `LibrarySetting.reservationExpiryDays`.
 - Cancelled reservations trigger queue resequencing for remaining pending holds.
+
+## Fines
+
+- Overdue returns generate `UNPAID` fines.
+- Members can view only their own fines.
+- Librarians and admins can mark fines as paid.
+- Only admins can waive fines.
+- Fine payments and waivers are written to the audit log.
