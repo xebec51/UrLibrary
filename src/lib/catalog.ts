@@ -27,6 +27,7 @@ export function enrichBook(book: (typeof books)[number]) {
   const rating = getAverageRating(book.slug);
   return {
     ...book,
+    isPublished: true,
     publisher: publishers.find((publisher) => publisher.slug === book.publisherSlug),
     authors: book.authorSlugs
       .map((slug) => authors.find((author) => author.slug === slug))
