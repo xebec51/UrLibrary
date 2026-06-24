@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArrowRight, BarChart3, BookCopy, Clock3, Library, Search, ShieldCheck } from "lucide-react";
+import { ArrowRight, BookCopy, Clock3, Library, Search, ShieldCheck } from "lucide-react";
 import { PublicShell } from "@/components/layout/public-shell";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";

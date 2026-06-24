@@ -1,147 +1,187 @@
-# 📖 UrLibrary - Katalog Buku Digital Full-Stack
+# UrLibrary Nexus
 
-**UrLibrary** adalah aplikasi web katalog buku digital yang dibangun sebagai Proyek Akhir untuk mata kuliah Pemrograman Web Lanjutan. Aplikasi ini didesain sebagai *Single-Page Application* (SPA) modern dengan arsitektur frontend dan backend yang terpisah, mencakup fungsionalitas untuk pengunjung, pengguna terdaftar, dan administrator.
+UrLibrary Nexus is a modern digital library management platform for catalog discovery, member engagement, copy inventory, borrowing, returns, reservations, fines, reports, exports, and role-based administration.
 
-## ✨ Fitur Utama
+The project preserves the original UrLibrary identity while modernizing the architecture into a single full-stack Next.js application suitable for a portfolio review.
 
-Aplikasi ini memiliki tiga peran pengguna dengan fitur yang berbeda:
+## Live Demo
 
-### 👤 Pengunjung (Tidak Login)
+Deployment URL: not deployed yet. The application is ready to deploy after configuring production environment variables and a PostgreSQL database.
 
-  - **Katalog Buku**: Melihat daftar lengkap buku yang tersedia dengan paginasi.
-  - **Pencarian Real-time**: Mencari buku berdasarkan judul atau penulis.
-  - **Filter Kategori**: Menyaring buku berdasarkan kategori yang tersedia.
-  - **Lihat Detail**: Mengakses halaman detail untuk setiap buku.
+## Original Context
 
-### 👩‍💻 Pengguna Terdaftar
+UrLibrary started as a separated React/Vite frontend and Flask backend for a digital book catalog. The original app included public catalog browsing, book detail pages, register/login, profiles, favorites, admin login, and admin book CRUD.
 
-  - **Semua fitur Pengunjung**.
-  - **Otentikasi**: Dapat membuat akun (Register) dan masuk (Login) ke dalam sistem.
-  - **Buku Favorit**: Menandai buku sebagai favorit dan melihat koleksi favorit di halaman khusus (`/my-favorites`).
-  - **Manajemen Sesi**: Status login dikelola menggunakan JSON Web Token (JWT).
+The legacy source is retained in `legacy/react-vite-flask/`. Runtime artifacts such as `.env`, Python bytecode, virtual environments, local SQLite databases, and uploaded local files were intentionally removed from tracked source.
 
-### 👑 Administrator
+## Modernization Summary
 
-  - **Login Khusus**: Halaman login terpisah untuk admin.
-  - **Dashboard Manajemen**: Panel admin untuk mengelola seluruh data buku.
-  - **CRUD Penuh**: Kemampuan untuk **C**reate (menambah), **R**ead (melihat), **U**pdate (mengedit), dan **D**elete (menghapus) data buku.
-  - **Terproteksi**: Semua aksi admin diamankan dan hanya bisa diakses oleh pengguna dengan status admin.
+- Migrated the root app to Next.js App Router, React, TypeScript, Tailwind CSS, Prisma, and NextAuth.
+- Added `ADMIN`, `LIBRARIAN`, and `MEMBER` roles.
+- Replaced localStorage token usage with signed HTTP-only sessions.
+- Added copy-level inventory, loans, returns, reservations, fines, notifications, reviews, reading lists, audit logs, reports, and XLSX export.
+- Added server-side route protection, role guards, business rule helpers, seed data, API documentation, and deployment notes.
 
------
+## Features
 
-## 🛠️ Tumpukan Teknologi (Tech Stack)
+- Public landing page, catalog, authors, categories, book detail pages, login, register, unauthorized, and about pages.
+- Server-shaped catalog search, category/tag filtering, availability filtering, sorting, and pagination.
+- Member workspace for favorites, reading lists, loans, reservations, fines, notifications, profile, reviews, and developer page.
+- Librarian workspace for books, copies, loans, returns, reservations, members, and operational reports.
+- Admin workspace for users, catalog, authors, publishers, categories, tags, settings, audit logs, and reports.
+- Borrowing and return workflow with eligibility checks, due dates, copy status updates, notifications, fines, and audit logs.
+- FIFO reservation queue with ready-for-pickup, expiry, cancellation, and queue resequencing helpers.
+- Fine payment and waiver actions with role restrictions.
+- XLSX export route with dynamic `xlsx` import.
 
-Proyek ini dibangun menggunakan teknologi modern untuk frontend dan backend.
+## Role Matrix
 
-### Frontend (`/ur-library`)
+| Capability | Guest | Member | Librarian | Admin |
+| --- | --- | --- | --- | --- |
+| Browse public catalog | Yes | Yes | Yes | Yes |
+| Manage own favorites, reading lists, reservations, reviews | No | Yes | Yes | Yes |
+| View own loans, fines, notifications | No | Yes | Yes | Yes |
+| Manage catalog and copies | No | No | Yes | Yes |
+| Issue loans and returns | No | No | Yes | Yes |
+| Manage reservations | No | No | Yes | Yes |
+| View member directory | No | No | Yes | Yes |
+| Manage users, roles, settings, audit logs | No | No | No | Yes |
+| Waive fines | No | No | No | Yes |
 
-  - **Framework**: React (dengan Vite)
-  - **Routing**: React Router DOM
-  - **Manajemen State**: React Context API
-  - **Styling**: Tailwind CSS & DaisyUI
-  - **HTTP Client**: `fetch` API
+## Tech Stack
 
-### Backend (`/urlibrary-backend`)
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma
+- PostgreSQL or Neon
+- NextAuth credentials auth
+- bcryptjs
+- Zod
+- React Hook Form dependency ready
+- Recharts
+- date-fns
+- xlsx
+- lucide-react
 
-  - **Framework**: Flask
-  - **Database**: SQLite (via Flask-SQLAlchemy)
-  - **Migrasi Database**: Flask-Migrate
-  - **Otentikasi**: JSON Web Token (via Flask-JWT-Extended)
-  - **Keamanan**:
-      - Hashing Password dengan Flask-Bcrypt
-      - Konfigurasi CORS dengan Flask-Cors
+## Architecture
 
------
+- `app/`: Next.js routes, server pages, route handlers, and server actions.
+- `src/components/`: reusable UI, layout, catalog, and report components.
+- `src/lib/`: domain helpers for auth, RBAC, catalog, circulation, reservations, fines, reports, and seed-backed demo data.
+- `prisma/`: Prisma schema, migration SQL, and seed script.
+- `docs/`: timeline, audit, business rules, security/performance, and API notes.
+- `legacy/react-vite-flask/`: preserved original React/Vite and Flask implementation.
 
-## 🚀 Panduan Instalasi dan Menjalankan Proyek
+## Database Summary
 
-Berikut adalah langkah-langkah untuk menjalankan proyek ini secara lokal.
+The Prisma schema implements:
 
-### Prasyarat
+`User`, `LibraryProfile`, `Book`, `BookCopy`, `Author`, `Publisher`, `Category`, `Tag`, `BookAuthor`, `BookCategory`, `BookTag`, `Favorite`, `ReadingList`, `ReadingListItem`, `Review`, `Loan`, `Reservation`, `Fine`, `Notification`, `AuditLog`, and `LibrarySetting`.
 
-  - Node.js (v18 atau lebih baru)
-  - Python (v3.10 atau lebih baru) dan `pip`
+Enums include roles, statuses, copy states, loan states, reservation states, fine states, notification types, and audit actions.
 
-### 1\. Kloning Repository
+## Business Flows
 
-```bash
-git clone https://github.com/xebec51/UrLibrary.git
-cd UrLibrary
-```
+Borrowing is copy-level. Staff selects a member and an available copy; the server checks account status, active loan limits, unpaid fine limits, and copy status. The system creates a loan, calculates the due date, marks the copy as borrowed, creates a notification, and writes an audit log.
 
-### 2\. Setup Backend (`/urlibrary-backend`)
+Returns update the loan to returned, calculate late days, create a fine when overdue, update copy availability, promote the first pending reservation when applicable, create notifications, and write an audit log.
 
-Buka terminal baru untuk backend.
+Reservations use FIFO queue positions. Members can reserve titles and cancel pending reservations. Staff can mark the first pending reservation as ready for pickup, fulfill pickup, cancel holds, and expire old ready reservations.
 
-```bash
-# Masuk ke direktori backend
-cd urlibrary-backend
+Fines are generated from late returns. Members can view their own fines. Librarians and admins can mark fines as paid; only admins can waive fines.
 
-# Buat dan aktifkan virtual environment
-python -m venv venv
-.\venv\Scripts\activate
+## Demo Accounts
 
-# Instal semua dependensi
-pip install -r requirements.txt 
-# (Catatan: Anda perlu membuat file requirements.txt terlebih dahulu dengan `pip freeze > requirements.txt`)
+All demo accounts use the password `Password123!`.
 
-# Buat file .env dan konfigurasikan
-# Salin konten di bawah ini ke dalam file .env baru
-# DATABASE_URL="sqlite:///urlibrary.db"
-# JWT_SECRET_KEY="kunci-rahasia-yang-sangat-acak-dan-kuat"
-# FLASK_APP=run.py
+| Email | Role |
+| --- | --- |
+| `admin@urlibrary.demo` | ADMIN |
+| `librarian@urlibrary.demo` | LIBRARIAN |
+| `member@urlibrary.demo` | MEMBER |
+| `member2@urlibrary.demo` | MEMBER |
 
-# Lakukan migrasi database untuk membuat tabel
-flask db init    # (Hanya jika folder 'migrations' belum ada)
-flask db migrate -m "Initial migration"
-flask db upgrade
-
-# Buat akun admin pertama kali (opsional, jika database kosong)
-# 1. Daftarkan user via API (lihat Postman) atau UI
-# 2. Jalankan `flask shell`
-# 3. from app.models import User, db
-# 4. user = User.query.get(1)
-# 5. user.is_admin = True
-# 6. db.session.commit()
-# 7. exit()
-```
-
-### 3\. Setup Frontend (`/ur-library`)
-
-Buka terminal lain untuk frontend.
+## Setup
 
 ```bash
-# Masuk ke direktori frontend
-cd ur-library
-
-# Instal semua dependensi
 npm install
+copy .env.example .env
+npx prisma validate
+npx prisma generate
+npx prisma migrate dev
+npm run db:seed
+npm run dev
 ```
 
-### 4\. Menjalankan Aplikasi
+Open `http://localhost:3000`.
 
-Anda perlu menjalankan kedua server secara bersamaan di terminal yang berbeda.
+## Environment Variables
 
-  - **Terminal Backend:**
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL or Neon connection string. |
+| `AUTH_SECRET` | Local or production NextAuth signing secret generated outside the repo. |
+| `AUTH_URL` | App URL for auth callbacks. |
+| `NEXT_PUBLIC_APP_URL` | Public app URL used by docs and deployment notes. |
 
-    ```bash
-    # Di dalam /urlibrary-backend
-    flask run
-    # Server akan berjalan di http://127.0.0.1:5000
-    ```
+Do not commit `.env`.
 
-  - **Terminal Frontend:**
+## Validation Commands
 
-    ```bash
-    # Di dalam /ur-library
-    npm run dev
-    # Aplikasi akan berjalan di http://localhost:5173
-    ```
+```bash
+npx prisma validate
+npx prisma generate
+npm run lint
+npm run build
+```
 
-Buka `http://localhost:5173` di browser Anda untuk melihat aplikasi secara live.
+## Deployment Notes
 
-## 👨‍💻 Kontributor
-  - **Muh. Rinaldi Ruslan** - (H071231074)
-  - **Muh. Alif Anugerah Putra** - (H071231065)
-  - **Dhian Alifka Azzahra** - (H071231022)
-  - **Muhammad Rifky Kurniawan** - (H071231023)
+- Configure PostgreSQL or Neon and set `DATABASE_URL`.
+- Generate `AUTH_SECRET` outside the repository.
+- Run Prisma migration and seed commands in the deployment environment.
+- Set `AUTH_URL` and `NEXT_PUBLIC_APP_URL` to the deployed URL.
+- No live deployment URL is claimed in this README.
+
+## Security Notes
+
+- Dashboard routes are protected by middleware.
+- Server actions enforce role checks with `requireRole`.
+- Export routes check active authenticated staff/admin sessions.
+- Sensitive member data is not exposed by public catalog routes.
+- The old tracked `.env` from the legacy app was removed from source control.
+
+## Known Limitations
+
+- No real institutional SSO.
+- No hardware barcode scanner integration.
+- No payment gateway for fines.
+- No multi-branch library mode.
+- No offline kiosk mode.
+- No production email provider.
+- No full MARC21 import pipeline.
+
+## Future Improvements
+
+- Add automated Playwright smoke tests.
+- Add real hosted PostgreSQL integration in CI.
+- Add email reminders and scheduled reservation expiry jobs.
+- Add barcode scanner hardware integration.
+- Add richer review moderation workflows.
+- Add MARC21 import and bibliographic enrichment.
+
+## Original Contributors
+
+- Muh. Rinaldi Ruslan
+- Muh. Alif Anugerah Putra
+- Dhian Alifka Azzahra
+- Muhammad Rifky Kurniawan
+
+## Developer Contact
+
+Muh. Rinaldi Ruslan  
+Email: rinaldi.ruslan51@gmail.com  
+LinkedIn: https://www.linkedin.com/in/rinaldiruslan  
+GitHub: https://github.com/xebec51
